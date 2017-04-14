@@ -1,19 +1,12 @@
 #pragma once
 
-#include "../defs.h"
-
 // addons
 #ifdef OFXOPERATIONS
     #include "ofxOperations.h"
 #endif
-// local
-#include "../utils/singleton.h"
-#include "AbstractDemo.hpp"
-// #include "DemoClass.hpp"
 
+namespace ofxDemo {
 
-namespace ofWarpingHalos { namespace demos {
-    
     template<class DemoClass>
     class DemoManager {
 
@@ -21,7 +14,7 @@ namespace ofWarpingHalos { namespace demos {
 
         DemoManager() : activeDemo(nullptr),
                         generatedOperations(nullptr){}
-        
+
          ~DemoManager(){ destroy(); }
         void destroy();
         bool update();
@@ -43,30 +36,32 @@ namespace ofWarpingHalos { namespace demos {
         std::vector<shared_ptr<DemoClass>> demos;
         shared_ptr<DemoClass> activeDemo;
 
-#ifdef OFXOPERATIONS
-    public: // methods
-        shared_ptr<ofxOperations::OperationGroup> generateOperations();
-    public: // attributes
-        shared_ptr<ofxOperations::OperationGroup> generatedOperations;
-    private: // callbacks
-        void onDestroyOpEnd(ofxOperations::Operation &op);
-        void onActivateOpEnd(ofxOperations::Operation &op);
-#endif
+    // ofxOperations support must be explicitly enabled
+    // through this pre-oprocessor macro
+    #ifdef OFXOPERATIONS
+        public: // methods
+            shared_ptr<ofxOperations::OperationGroup> generateOperations();
+        public: // attributes
+            shared_ptr<ofxOperations::OperationGroup> generatedOperations;
+        private: // callbacks
+            void onDestroyOpEnd(ofxOperations::Operation &op);
+            void onActivateOpEnd(ofxOperations::Operation &op);
+    #endif
     };
-    
-    //
-    // Helper Class
-    //
+
+//
+// Helper Class
+//
 
 #ifdef OFXOPERATIONS
-    
+
     // Operation subclass with demo attribute
     template<class DemoClass>
     class DemoOp : public ofxOperations::Operation {
     public:
         shared_ptr<DemoClass> demo;
     };
-    
+
     // Creates a group of activate operations, and destroy operations
     // for all demos which have been setup-ed.
     // It stores the group locally in the public 'generatedOperations' attribure,
@@ -79,9 +74,9 @@ namespace ofWarpingHalos { namespace demos {
         // caches the execution of this method
         if(generatedOperations != nullptr)
             return generatedOperations;
-        
+
         generatedOperations = make_shared<ofxOperations::OperationGroup>();
-        
+
         for(auto demo : demos){
             // create an 'Activate' operation for every demo
             {
@@ -91,7 +86,7 @@ namespace ofWarpingHalos { namespace demos {
                 generatedOperations->add(op);
                 ofAddListener(op->endEvent, this, &DemoManager<DemoClass>::onActivateOpEnd);
             }
-            
+
             // Create a 'Destroy' (Cleanup) operation if the demo isSetup
             if(demo->isSetup())
             {
@@ -102,35 +97,35 @@ namespace ofWarpingHalos { namespace demos {
                 ofAddListener(op->endEvent, this, &DemoManager<DemoClass>::onDestroyOpEnd);
             }
         }
-        
+
         return generatedOperations;
     }
-    
+
     template<class DemoClass>
     void DemoManager<DemoClass>::onDestroyOpEnd(ofxOperations::Operation &op){
         if(generatedOperations != nullptr)
             generatedOperations->remove(op);
-        
+
         auto demo = ((DemoOp<DemoClass>*)&op)->demo;
-        
+
         if(this->getActive() == demo)
             deactivate();
-        
+
         demo->_destroy();
     }
-    
+
     template<class DemoClass>
     void DemoManager<DemoClass>::onActivateOpEnd(ofxOperations::Operation &op){
         this->activate(((DemoOp<DemoClass>*)&op)->demo);
     }
-    
+
 #endif
 
-}} // namespace ofWarpingHalos::demos
+} // namespace ofxDemo
 
 
 
-using namespace ofWarpingHalos::demos;
+using namespace ofxDemo;
 
 template <class DemoClass>
 void DemoManager<DemoClass>::destroy(){
@@ -142,17 +137,17 @@ void DemoManager<DemoClass>::destroy(){
     for(auto demo : demos){
         demo->_destroy();
     }
-    
+
     demos.clear();
 }
 
 template <class DemoClass>
 bool DemoManager<DemoClass>::update(){
     auto demo = getActive();
-    
+
     if(demo == nullptr)
         return false;
-    
+
     demo->update();
     return true;
 }
@@ -160,10 +155,10 @@ bool DemoManager<DemoClass>::update(){
 template <class DemoClass>
 bool DemoManager<DemoClass>::draw(){
     auto demo = getActive();
-    
+
     if(demo == nullptr)
         return false;
-    
+
     demo->draw();
     return true;
 }
@@ -181,7 +176,7 @@ void DemoManager<DemoClass>::deactivate(){
     for(auto demo : demos){
         demo->activeParam.set(false);
     }
-    
+
     activeDemo = nullptr;
 }
 
@@ -190,14 +185,14 @@ void DemoManager<DemoClass>::activate(shared_ptr<DemoClass> demo){
     deactivate();
 
     activeDemo = demo;
-    
+
     if(demo == nullptr){
 #ifdef DEBUG
         ofSetWindowTitle("No Active Demo");
 #endif
         return;
     }
-    
+
     if(!demo->isSetup()){
         demo->_setup();
 #ifdef OFXOPERATIONS
@@ -213,7 +208,7 @@ void DemoManager<DemoClass>::activate(shared_ptr<DemoClass> demo){
     }
 
     demo->activeParam.set(true);
-    
+
 #ifdef DEBUG
     ofSetWindowTitle(demo->getName());
 #endif
@@ -238,7 +233,7 @@ int DemoManager<DemoClass>::getActiveIndex(){
             return i;
         i++;
     }
-    
+
     return -1;
 }
 
@@ -254,7 +249,6 @@ shared_ptr<DemoClass> DemoManager<DemoClass>::getByName(const string &name){
             return demo;
         }
     }
-    
+
     return nullptr;
 }
-

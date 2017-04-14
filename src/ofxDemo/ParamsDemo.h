@@ -1,16 +1,18 @@
-#pragma once 
+#pragma once
 
 // OF
 #include "ofMain.h"
 // local
 #include "AbstractDemo.hpp"
 
-namespace ofWarpingHalos { namespace demos {
-    
-    class BaseDemo : public AbstractDemo {
-        
+namespace ofxDemo {
+
+    // This is an example ParamsDemo class that loads
+    // and saves its own params xml file at setup/destroy
+    class ParamsDemo : public AbstractDemo {
+
     public: // methods
-        BaseDemo();
+        ParamsDemo();
         void _setup();
         void _destroy();
 
@@ -19,10 +21,10 @@ namespace ofWarpingHalos { namespace demos {
     private: // attributes
 
         string paramsFile;
-    
+
     public: // params
-        
+
         ofParameterGroup params;
     };
 
-}}
+} // namespace ofxDemo
