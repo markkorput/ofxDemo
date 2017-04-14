@@ -1,6 +1,8 @@
 #pragma once
 
 // addons
+#include "ofMain.h"
+
 #ifdef OFXOPERATIONS
     #include "ofxOperations.h"
 #endif
