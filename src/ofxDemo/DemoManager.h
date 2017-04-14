@@ -25,6 +25,7 @@ namespace ofxDemo {
         void destroy();
         bool update();
         bool draw();
+        bool drawDebug();
 
         void add(shared_ptr<DemoClass> newDemo);
         void deactivate();
@@ -166,6 +167,17 @@ bool DemoManager<DemoClass>::draw(){
         return false;
 
     demo->draw();
+    return true;
+}
+
+template <class DemoClass>
+bool DemoManager<DemoClass>::drawDebug(){
+    auto demo = getActive();
+
+    if(demo == nullptr)
+        return false;
+
+    demo->drawDebug();
     return true;
 }
 
