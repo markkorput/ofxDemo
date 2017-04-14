@@ -1,5 +1,5 @@
 // local
-#include "ParamsDemo.hpp"
+#include "ParamsDemo.h"
 
 using namespace ofxDemo;
 

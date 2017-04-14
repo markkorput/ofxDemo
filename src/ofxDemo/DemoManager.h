@@ -12,8 +12,12 @@ namespace ofxDemo {
 
     public: // methods
 
-        DemoManager() : activeDemo(nullptr),
-                        generatedOperations(nullptr){}
+        DemoManager() :
+        #ifdef OFXOPERATIONS
+                        generatedOperations(nullptr),
+        #endif
+                        activeDemo(nullptr)
+                        {}
 
          ~DemoManager(){ destroy(); }
         void destroy();

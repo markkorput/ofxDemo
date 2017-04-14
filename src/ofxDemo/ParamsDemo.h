@@ -3,7 +3,7 @@
 // OF
 #include "ofMain.h"
 // local
-#include "AbstractDemo.hpp"
+#include "AbstractDemo.h"
 
 namespace ofxDemo {
 
