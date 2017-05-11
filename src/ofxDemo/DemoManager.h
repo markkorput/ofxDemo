@@ -39,7 +39,8 @@ namespace ofxDemo {
         const string getActiveName();
         shared_ptr<DemoClass> getByName(const string &name);
 
-    // public:
+    public:
+            ofEvent<string> demoChangeEvent;
     //
     //     ofEvent<DemoClass> activateEvent;
     //     ofEvent<DemoClass> deactivateEvent;
@@ -199,7 +200,7 @@ template <class DemoClass>
 void DemoManager<DemoClass>::deactivate(){
     for(auto demo : demos){
         if(demo->activeParam.get()){
-            // ofNotifyListeners(deactivateEvent, *demo.get());
+            // ofNotifyEvent(deactivateEvent, *demo.get());
             demo->activeParam.set(false);
         }
     }
@@ -217,6 +218,8 @@ void DemoManager<DemoClass>::activate(shared_ptr<DemoClass> demo){
 #ifdef DEBUG
         ofSetWindowTitle("No Active Demo");
 #endif
+        string newName = getActiveName();
+        ofNotifyEvent(demoChangeEvent, newName);
         return;
     }
 
@@ -235,7 +238,9 @@ void DemoManager<DemoClass>::activate(shared_ptr<DemoClass> demo){
     }
 
     demo->activeParam.set(true);
-    // ofNotifyListeners(activateEvent, *demo.get());
+    // ofNotifyEvent(activateEvent, *demo.get());
+    string newName = getActiveName();
+    ofNotifyEvent(demoChangeEvent, newName);
 
 #ifdef DEBUG
     ofSetWindowTitle(demo->getName());
