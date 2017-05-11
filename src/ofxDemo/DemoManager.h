@@ -29,14 +29,20 @@ namespace ofxDemo {
 
         void add(shared_ptr<DemoClass> newDemo);
         void deactivate();
-        void activate(shared_ptr<DemoClass> demo);
         void activate(int i);
+        void activate(const string& name);
+        void activate(shared_ptr<DemoClass> demo);
 
         shared_ptr<DemoClass> getActive();
         int getCount(){ return demos.size(); }
         int getActiveIndex();
         const string getActiveName();
         shared_ptr<DemoClass> getByName(const string &name);
+
+    // public:
+    //
+    //     ofEvent<DemoClass> activateEvent;
+    //     ofEvent<DemoClass> deactivateEvent;
 
     private: // attributes
 
@@ -192,7 +198,10 @@ void DemoManager<DemoClass>::add(shared_ptr<DemoClass> newDemo){
 template <class DemoClass>
 void DemoManager<DemoClass>::deactivate(){
     for(auto demo : demos){
-        demo->activeParam.set(false);
+        if(demo->activeParam.get()){
+            // ofNotifyListeners(deactivateEvent, *demo.get());
+            demo->activeParam.set(false);
+        }
     }
 
     activeDemo = nullptr;
@@ -226,6 +235,7 @@ void DemoManager<DemoClass>::activate(shared_ptr<DemoClass> demo){
     }
 
     demo->activeParam.set(true);
+    // ofNotifyListeners(activateEvent, *demo.get());
 
 #ifdef DEBUG
     ofSetWindowTitle(demo->getName());
@@ -236,6 +246,18 @@ template <class DemoClass>
 void DemoManager<DemoClass>::activate(int i){
     if(i < demos.size())
         activate(demos[i]);
+}
+
+template <class DemoClass>
+void DemoManager<DemoClass>::activate(const string& name){
+    for(auto demo : demos){
+        if(demo->getName() == name){
+            activate(demo);
+            return;
+        }
+    }
+
+    ofLogWarning() << "could not find demo '" << name << "' to activate";
 }
 
 template <class DemoClass>
